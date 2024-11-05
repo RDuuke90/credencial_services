@@ -3,13 +3,20 @@
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 
-<h1>Acceso</h1>
+<link rel="stylesheet" href="css/styles.css">
 
-<div>
-    <label for="key">Clave de acceso: </label>
-    <input type="password" id="key" @bind="key" />
-    <button @onclick="Access">Acceder</button>
 
+<div class="container">
+    <h1>Acceso</h1>
+
+    <div class="form-group">
+        <label for="key">Clave de acceso:</label>
+        <input type="password" id="key" @bind="key" />
+    </div>
+
+    <button @onclick="Access" class="btn-access">Acceder</button>
+
+    <p class="message">@message</p>
 </div>
 
 <p>@message</p>
@@ -22,16 +29,20 @@
     {
         var response = await Http.PostAsJsonAsync("/api/authenticate", key);
         if (response.IsSuccessStatusCode) {
-
             var isAuthenticated = await response.Content.ReadAsStringAsync();
             if (Boolean.Parse(isAuthenticated)) {
                 await JSRuntime.InvokeVoidAsync("localStorage.setItem", "key", "true");
                 message = "Acceso concedido";
 
+                // Navegar a la página de credenciales después de autenticarse
                 NavigationManager.NavigateTo("/credencial");
                 return;
             }
             message = "Clave incorrecta";
+        }
+        else
+        {
+            message = "Error en el proceso de autenticación.";
         }
     }
 }

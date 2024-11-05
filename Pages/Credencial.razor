@@ -3,6 +3,9 @@
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 
+<link rel="stylesheet" href="css/styles.css">
+
+
 <h1>Crear credencial</h1>
 
 <div>
@@ -22,8 +25,23 @@
 
 <button @onclick="CrearCredencial">Crear</button>
 
-<h2>Lista de Credenciales</h2>
+<h2>Buscar Credencial</h2>
+<div>
+    <label for="buscarServicio">Servicio a buscar:</label>
+    <input @bind="buscarServicio" id="buscarServicio" />
+    <button @onclick="BuscarCredencial">Buscar</button>
+</div>
+<p>@resultadoBusqueda</p>
 
+<h2>Eliminar Credencial</h2>
+<div>
+    <label for="eliminarServicio">Servicio a eliminar:</label>
+    <input @bind="eliminarServicio" id="eliminarServicio" />
+    <button @onclick="EliminarCredencial">Eliminar</button>
+</div>
+<p>@resultadoEliminacion</p>
+
+<h2>Lista de Credenciales</h2>
 <ul>
     @foreach(var credencial in crendenciales) {
         <li>@credencial.servicio (@credencial.usuario)</li>
@@ -31,20 +49,21 @@
 </ul>
 
 @code {
-    private string servicio;
-    private string usuario;
-    private string password;
+    private string? servicio;
+    private string? usuario;
+    private string? password;
+    private string buscarServicio = string.Empty;
+    private string eliminarServicio = string.Empty;
+    private string resultadoBusqueda = string.Empty;
+    private string resultadoEliminacion = string.Empty;
 
     private List<CredencialDto> crendenciales = new List<CredencialDto>();
-    
+
     protected override async Task OnInitializedAsync(){
-
         var isAuthenticated = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "key");
-
         if (isAuthenticated != "true") {
             NavigationManager.NavigateTo("/accesss");
         }
-
         await cargarCredenciales();
     }
 
@@ -54,10 +73,32 @@
             servicio = this.servicio, 
             usuario = this.usuario, 
             password = this.password 
-        
         };
         var response = await HttpClient.PostAsJsonAsync("/api/credenciales", credencial);
+        if (response.IsSuccessStatusCode)
+        {
+            await cargarCredenciales();
+        }
+    }
 
+    private async Task BuscarCredencial()
+    {
+        var response = await HttpClient.GetAsync($"/api/credenciales/buscar/{buscarServicio}");
+        if (response.IsSuccessStatusCode)
+        {
+            var credencial = await response.Content.ReadFromJsonAsync<CredencialDto>();
+            resultadoBusqueda = $"Credencial encontrada: Servicio - {credencial?.servicio}, Usuario - {credencial?.usuario}";
+        }
+        else
+        {
+            resultadoBusqueda = "Credencial no encontrada";
+        }
+    }
+
+    private async Task EliminarCredencial()
+    {
+        var response = await HttpClient.DeleteAsync($"/api/credenciales/eliminar/{eliminarServicio}");
+        resultadoEliminacion = response.IsSuccessStatusCode ? "Credencial eliminada con éxito" : "Credencial no encontrada";
         if (response.IsSuccessStatusCode)
         {
             await cargarCredenciales();
@@ -72,9 +113,8 @@
 
     public class CredencialDto
     {
-        public string servicio { get; set; }
-        public string usuario { get; set; }
-        public string password { get; set; }
+        public string? servicio { get; set; }
+        public string? usuario { get; set; }
+        public string? password { get; set; }
     }
-
 }
