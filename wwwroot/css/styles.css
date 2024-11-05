@@ -1,0 +1,89 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+}
+
+.container {
+  width: 90%;
+  max-width: 600px;
+  background-color: #ffffff;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  transition: transform 0.3s ease;
+}
+
+.container {
+  width: 90%;
+  max-width: 600px;
+  background-color: #ffffff;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  transition: transform 0.3s ease;
+}
+
+.container:hover {
+  transform: scale(1.02);
+}
+
+h1,
+h2 {
+  color: #5a67d8;
+  font-weight: 600;
+  margin-top: 0;
+  text-align: center;
+}
+
+input[type="password"],
+input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  margin-bottom: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+input[type="password"]:focus,
+input[type="text"]:focus {
+  border-color: #5a67d8;
+  outline: none;
+}
+
+button {
+  background-color: #5a67d8;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background-color: #434190;
+  transform: translateY(-2px);
+}
+
+.message {
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #e2e8f0;
+  border-left: 4px solid #5a67d8;
+  border-radius: 8px;
+  color: #333;
+  font-size: 14px;
+  font-style: italic;
+  text-align: center;
+}
