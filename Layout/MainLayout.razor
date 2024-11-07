@@ -1,2 +1,66 @@
 ﻿@inherits LayoutComponentBase
-@Body
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+
+<div class="container">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <a class="navbar-brand" href="/">Gestión de Credenciales</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                @if (isAuthenticated)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" href="/crear">Crear Credencial</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/listar">Listar Credenciales</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/buscar">Buscar Credencial</a>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-link nav-link" @onclick="CerrarSesion">Cerrar Sesión</button>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" href="/access">Acceso</a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </nav>
+
+    <div class="content">
+        @Body
+    </div>
+</div>
+
+@code {
+    private bool isAuthenticated;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Verifica si el token está en localStorage
+        var token = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
+        isAuthenticated = token == "authenticated";
+
+        // Si no está autenticado y no está en la página de acceso, redirigir a /access
+        if (!isAuthenticated && !NavigationManager.Uri.Contains("/access"))
+        {
+            NavigationManager.NavigateTo("/access");
+        }
+    }
+
+    private async Task CerrarSesion()
+    {
+        // Elimina el token de localStorage y redirige a /access
+        await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "authToken");
+        isAuthenticated = false;
+        NavigationManager.NavigateTo("/access");
+    }
+}

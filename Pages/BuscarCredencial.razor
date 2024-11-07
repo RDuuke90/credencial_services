@@ -1,0 +1,92 @@
+@page "/buscar"
+@inject HttpClient HttpClient
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+
+<h2>Buscar Credencial</h2>
+
+@if (!isAuthenticated)
+{
+    <p class="text-danger">Debe ingresar la clave de acceso para acceder a esta página.</p>
+}
+else
+{
+    <div class="form-group">
+        <label>Servicio:</label>
+        <input @bind="buscarServicio" class="form-control" />
+    </div>
+    <br />
+    <button @onclick="buscar_credencial" class="btn btn-info">Buscar</button>
+
+    @if (credencialEncontrada != null)
+    {
+        <div class="mt-3">
+            <p>Resultado de la búsqueda: <strong>@credencialEncontrada.servicio</strong> (Usuario: @credencialEncontrada.usuario)</p>
+            <button @onclick="MostrarPassword" class="btn btn-secondary">Ver Contraseña</button>
+
+            @if (!string.IsNullOrEmpty(mensajeBusqueda))
+            {
+                <p class="mt-3 text-primary"><strong>Contraseña: @mensajeBusqueda</strong></p>
+            }
+        </div>
+    }
+    else if (mensajeBusqueda != null)
+    {
+        <p class="mt-3 text-danger">@mensajeBusqueda</p>
+    }
+}
+
+@code {
+    private bool isAuthenticated;
+    private string buscarServicio;
+    private CredencialDto? credencialEncontrada;
+    private string? mensajeBusqueda;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Verificar si el token de autenticación existe en localStorage
+        var token = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
+        isAuthenticated = token == "authenticated"; // Si es el valor esperado, estamos autenticados
+
+        // Si no está autenticado, redirigir a la página de acceso
+        if (!isAuthenticated)
+        {
+            NavigationManager.NavigateTo("/access");
+        }
+    }
+
+    private async Task buscar_credencial()
+    {
+        var response = await HttpClient.GetAsync($"/api/credenciales/{buscarServicio}");
+        if (response.IsSuccessStatusCode)
+        {
+            credencialEncontrada = await response.Content.ReadFromJsonAsync<CredencialDto>();
+            mensajeBusqueda = null; // Reinicia el mensaje si encuentra la credencial
+        }
+        else
+        {
+            credencialEncontrada = null;
+            mensajeBusqueda = "Credencial no encontrada";
+        }
+    }
+
+    private async Task MostrarPassword()
+    {
+        var accessKey = await JSRuntime.InvokeAsync<string>("prompt", "Ingrese la clave de acceso:");
+        if (accessKey == "123456789")
+        {
+            mensajeBusqueda = credencialEncontrada?.password;
+        }
+        else
+        {
+            mensajeBusqueda = "Clave incorrecta";
+        }
+    }
+
+    public class CredencialDto
+    {
+        public string servicio { get; set; }
+        public string usuario { get; set; }
+        public string password { get; set; }
+    }
+}

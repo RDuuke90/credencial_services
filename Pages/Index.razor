@@ -9,7 +9,6 @@
     <label for="key">Clave de acceso: </label>
     <input type="password" id="key" @bind="key" />
     <button @onclick="Access">Acceder</button>
-
 </div>
 
 <p>@message</p>
@@ -25,10 +24,10 @@
 
             var isAuthenticated = await response.Content.ReadAsStringAsync();
             if (Boolean.Parse(isAuthenticated)) {
-                await JSRuntime.InvokeVoidAsync("localStorage.setItem", "key", "true");
+                await JSRuntime.InvokeVoidAsync("localStorage.setItem", "authToken", "authenticated");
                 message = "Acceso concedido";
 
-                NavigationManager.NavigateTo("/credencial");
+                NavigationManager.NavigateTo("/");
                 return;
             }
             message = "Clave incorrecta";

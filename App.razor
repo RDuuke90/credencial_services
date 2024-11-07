@@ -1,12 +1,30 @@
-﻿<Router AppAssembly="@typeof(App).Assembly">
+﻿@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var isAuthenticated = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "key");
+
+        if (isAuthenticated != "true")
+        {
+            NavigationManager.NavigateTo("/access", true);
+        }
+    }
+}
+
+<Router AppAssembly="@typeof(App).Assembly">
+
     <Found Context="routeData">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
+
     <NotFound>
-        <PageTitle>Not found</PageTitle>
+        <PageTitle>No encontrada</PageTitle>
         <LayoutView Layout="@typeof(MainLayout)">
-            <p role="alert">Sorry, there's nothing at this address.</p>
+            <p role="alert">No encontré esta página.</p>
         </LayoutView>
     </NotFound>
+
 </Router>
